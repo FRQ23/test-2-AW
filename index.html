@@ -245,6 +245,52 @@
             </form>
         </div>
     </section>
+    <section id="register" class="register-section">
+        <div class="container register-section__contenedor">
+            <div class="register-section__intro">
+                <span class="register-section__etiqueta">Practice 6</span>
+                <h2 class="register-section__titulo">User Registration Form</h2>
+                <p class="register-section__descripcion">
+                    Complete the following form to simulate your registration. The form validates every field in real time and before submission as required in Practice 6.
+                </p>
+            </div>
+            <form id="register-form" class="register-form" novalidate>
+                <div class="register-form__group">
+                    <label class="register-form__label" for="regFullName">Full Name *</label>
+                    <input type="text" id="regFullName" name="regFullName" class="register-form__input" minlength="3" required placeholder="Jane Doe">
+                    <small class="form-error" data-error-for="regFullName"></small>
+                </div>
+                <div class="register-form__group">
+                    <label class="register-form__label" for="regEmail">Email *</label>
+                    <input type="email" id="regEmail" name="regEmail" class="register-form__input" required placeholder="example@email.com">
+                    <small class="form-error" data-error-for="regEmail"></small>
+                </div>
+                <div class="register-form__row">
+                    <div class="register-form__group">
+                        <label class="register-form__label" for="regPassword">Password *</label>
+                        <input type="password" id="regPassword" name="regPassword" class="register-form__input" minlength="8" required placeholder="At least 8 characters">
+                        <small class="form-error" data-error-for="regPassword"></small>
+                    </div>
+                    <div class="register-form__group">
+                        <label class="register-form__label" for="regConfirmPassword">Confirm Password *</label>
+                        <input type="password" id="regConfirmPassword" name="regConfirmPassword" class="register-form__input" minlength="8" required placeholder="Repeat your password">
+                        <small class="form-error" data-error-for="regConfirmPassword"></small>
+                    </div>
+                </div>
+                <div class="register-form__group register-form__group--checkbox">
+                    <label class="form-checkbox">
+                        <input type="checkbox" id="regTerms" name="regTerms" required>
+                        <span>I have read and accept the terms and conditions *</span>
+                    </label>
+                    <small class="form-error" data-error-for="regTerms"></small>
+                </div>
+                <div class="register-form__submit-wrapper">
+                    <button type="submit" class="register-form__button" disabled>Register</button>
+                    <p id="register-form-status" class="register-form__status" aria-live="polite"></p>
+                </div>
+            </form>
+        </div>
+    </section>
     <footer id="contact" class="bonsai-footer">
         <div class="container bonsai-footer__contenedor">
             <div class="bonsai-footer__brand">
@@ -291,37 +337,156 @@
     </footer>
 
     <script>
-        // Cerrar el menú hamburguesa cuando se hace clic en un enlace
+        const navToggle = document.getElementById('nav-toggle');
         document.querySelectorAll('.navegacion__enlace').forEach(link => {
-            link.addEventListener('click', function() {
-                document.getElementById('nav-toggle').checked = false;
+            link.addEventListener('click', () => {
+                if (navToggle) {
+                    navToggle.checked = false;
+                }
             });
         });
 
-        // Manejar el envío del formulario de cotización
-        document.getElementById('quote-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Obtener los datos del formulario
-            const formData = {
-                fullName: document.getElementById('fullName').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                bonsaiType: document.getElementById('bonsaiType').value,
-                size: document.getElementById('size').value,
-                budget: document.getElementById('budget').value,
-                message: document.getElementById('message').value
+        const quoteForm = document.getElementById('quote-form');
+        if (quoteForm) {
+            quoteForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = {
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    bonsaiType: document.getElementById('bonsaiType').value,
+                    size: document.getElementById('size').value,
+                    budget: document.getElementById('budget').value,
+                    message: document.getElementById('message').value
+                };
+
+                console.log('Quote Request:', formData);
+                alert('Thank you for your quote request! We will contact you within 24 hours with a personalized quote.');
+                this.reset();
+            });
+        }
+
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            const statusMessage = document.getElementById('register-form-status');
+            const submitButton = registerForm.querySelector('button[type="submit"]');
+            const inputs = Array.from(registerForm.querySelectorAll('.register-form__input'));
+            const termsCheckbox = document.getElementById('regTerms');
+
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+            const validators = {
+                regFullName: value => value.trim().length >= 3 ? '' : 'Please enter at least 3 characters.',
+                regEmail: value => emailPattern.test(value.trim()) ? '' : 'Enter a valid email address.',
+                regPassword: value => value.length >= 8 ? '' : 'Password must be at least 8 characters.',
+                regConfirmPassword: (value, formValues) => value === formValues.regPassword && value.length >= 8 ? '' : 'Passwords must match and be at least 8 characters.',
+                regTerms: (_, __, field) => field.checked ? '' : 'You must accept the terms to continue.'
             };
-            
-            // Simular envío (aquí puedes agregar tu lógica de backend)
-            console.log('Quote Request:', formData);
-            
-            // Mostrar mensaje de éxito
-            alert('Thank you for your quote request! We will contact you within 24 hours with a personalized quote.');
-            
-            // Limpiar el formulario
-            this.reset();
-        });
+
+            const getFieldValue = field => {
+                if (!field) return '';
+                return field.type === 'password' ? field.value : field.value.trim();
+            };
+
+            const getFormValues = () => inputs.reduce((acc, input) => {
+                acc[input.id] = getFieldValue(input);
+                return acc;
+            }, {});
+
+            const showError = (fieldId, message) => {
+                const field = document.getElementById(fieldId);
+                const errorEl = registerForm.querySelector(`[data-error-for="${fieldId}"]`);
+                if (!errorEl) return;
+                errorEl.textContent = message;
+                if (field && field.classList && field.type !== 'checkbox') {
+                    if (message) {
+                        field.classList.add('is-invalid');
+                        field.classList.remove('is-valid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                        field.classList.add('is-valid');
+                    }
+                }
+            };
+
+            const validateField = (fieldId, options = {}) => {
+                const { silent = false } = options;
+                const field = document.getElementById(fieldId);
+                if (!field || !validators[fieldId]) return true;
+                const formValues = getFormValues();
+                const message = validators[fieldId](fieldId === 'regTerms' ? field.checked : getFieldValue(field), formValues, field);
+                if (!silent) {
+                    showError(fieldId, message);
+                }
+                return message === '';
+            };
+
+            const validateForm = (options = {}) => {
+                const fieldIds = ['regFullName', 'regEmail', 'regPassword', 'regConfirmPassword'];
+                const results = fieldIds.map(id => validateField(id, options));
+                const termsValid = validateField('regTerms', options);
+                return [...results, termsValid].every(Boolean);
+            };
+
+            const updateSubmitState = () => {
+                const isValid = validateForm({ silent: true });
+                if (submitButton) {
+                    submitButton.disabled = !isValid;
+                }
+                return isValid;
+            };
+
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    validateField(input.id);
+                    if (input.id === 'regPassword') {
+                        validateField('regConfirmPassword');
+                    }
+                    updateSubmitState();
+                });
+                input.addEventListener('blur', () => {
+                    validateField(input.id);
+                    updateSubmitState();
+                });
+            });
+
+            if (termsCheckbox) {
+                termsCheckbox.addEventListener('change', () => {
+                    validateField('regTerms');
+                    updateSubmitState();
+                });
+            }
+
+            registerForm.addEventListener('submit', event => {
+                event.preventDefault();
+                const isValid = validateForm();
+                if (!isValid) {
+                    updateSubmitState();
+                    if (statusMessage) {
+                        statusMessage.textContent = 'Please fix the highlighted fields.';
+                        statusMessage.style.color = '#c0392b';
+                    }
+                    return;
+                }
+
+                const values = getFormValues();
+                console.log('Register Form Submission:', values);
+                if (statusMessage) {
+                    statusMessage.textContent = `Registration ready for ${values.regFullName}.`;
+                    statusMessage.style.color = '#2c7a37';
+                }
+
+                registerForm.reset();
+                inputs.forEach(field => field.classList.remove('is-valid', 'is-invalid'));
+                if (termsCheckbox) {
+                    termsCheckbox.checked = false;
+                }
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+            });
+
+            updateSubmitState();
+        }
     </script>
 </body>
 </html>
