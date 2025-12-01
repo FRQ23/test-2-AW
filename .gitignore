@@ -1,3 +1,31 @@
-# Ignore any media assets inside video/ but keep the folder itself
-video/*
-!video/.gitkeep
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de configuración sensibles
+config.php
+
+# Archivos temporales de PHP
+*.log
+*.tmp
+
+# Archivos de test
+test_db.php
+
+# Carpeta de videos (archivos muy grandes)
+video/*.mp4
+
+# Carpeta de Node modules si existiera
+node_modules/
+
+# Archivos de editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos de sesiones PHP
+sessions/
+tmp/
